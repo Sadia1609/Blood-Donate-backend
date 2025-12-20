@@ -1,3 +1,8 @@
+//from mongodb 
+
+const { MongoClient, ServerApiVersion } = require('mongodb');
+
+
 //initial configuration
 const express = require('express');
 const cors = require('cors');
@@ -11,10 +16,40 @@ app.use(express.json())
 //end initial config
 
 
+const admin = require("firebase-admin");
+const decoded = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf8')
+const serviceAccount = JSON.parse(decoded);
 
-//from mongodb 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+
+
+//jwt middleware
+const verifyFBToken = async(req,res,next) =>{
+  const token = req.headers.authorization;
+
+  if(!token){
+    return res.status(401).send({message: 'unauthorize access'})
+  }
+
+  try{
+    const idToken = token.split(' ')[1]
+    const decoded = await admin.auth().verifyIdToken(idToken)
+    console.log("decodes info", decoded)
+    req.decoded_email = decoded.email;
+    next();
+    
+  }
+  catch(error){
+    return res.status(401).send({message: 'unauthorize access'})
+
+  }
+
+}
+
+
 const uri = "mongodb+srv://missionscic11:JCs7DKooZkysSMFN@cluster0.e62g5zs.mongodb.net/?appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -64,8 +99,8 @@ async function run() {
     })
 
 
-    //add request api(sent data frontend to backend)
-    app.post('/requests', async(req,res)=>{
+    //add request api(sent data frontend to backend) 
+    app.post('/requests', verifyFBToken, async(req,res)=>{
       const data = req.body;
       data.createdAt = new Date();
       const result = await requestsCollections.insertOne(data)
