@@ -35,13 +35,14 @@ async function run() {
     //create API
     const database = client.db('missionscic11DB')
     const userCollections = database.collection('user')
-    const productCollections = database.collection('product')
+    const requestsCollections = database.collection('request')
 
     //save in database user info with post
     app.post('/users', async(req,res)=>{
         const userInfo = req.body;
         userInfo.createdAt = new Date();
         userInfo.role = 'donar'
+        userInfo.status = 'active'
         const result = await userCollections.insertOne(userInfo);
 
         res.send(result)
@@ -63,11 +64,11 @@ async function run() {
     })
 
 
-    //add products api(sent data frontend to backend)
-    app.post('/products', async(req,res)=>{
+    //add request api(sent data frontend to backend)
+    app.post('/requests', async(req,res)=>{
       const data = req.body;
       data.createdAt = new Date();
-      const result = await productCollections.insertOne(data)
+      const result = await requestsCollections.insertOne(data)
 
       //sent data frontend to backend
       res.send(result)
