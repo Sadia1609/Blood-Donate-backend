@@ -18,7 +18,7 @@ app.use(express.json())
 
 const admin = require("firebase-admin");
 const decoded = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf8')
-const serviceAccount = JSON.parse(decoded);
+const serviceAccount = require("./blood-donate.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -37,7 +37,7 @@ const verifyFBToken = async(req,res,next) =>{
   try{
     const idToken = token.split(' ')[1]
     const decoded = await admin.auth().verifyIdToken(idToken)
-    console.log("decodes info", decoded)
+    console.log("decoded info", decoded)
     req.decoded_email = decoded.email;
     next();
     
@@ -51,6 +51,7 @@ const verifyFBToken = async(req,res,next) =>{
 
 
 const uri = "mongodb+srv://missionscic11:JCs7DKooZkysSMFN@cluster0.e62g5zs.mongodb.net/?appName=Cluster0";
+
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -107,16 +108,17 @@ async function run() {
 
       //sent data frontend to backend
       res.send(result)
+     
     })
 
-    //get manager products
-    app.get('/manager/products/:email', async(req,res)=>{
-        const email = req.params.email;
-        const query = {managerEmail: email};
+    // //get manager products
+    // app.get('/manager/products/:email', async(req,res)=>{
+    //     const email = req.params.email;
+    //     const query = {managerEmail: email};
 
-        const result = await productCollections.find(query).toArray();
-        res.send(result)
-    })
+    //     const result = await productCollections.find(query).toArray();
+    //     res.send(result)
+    // })
 
 
 
