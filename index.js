@@ -75,6 +75,7 @@ async function run() {
     const database = client.db('missionscic11DB')
     const userCollections = database.collection('user')
     const requestsCollections = database.collection('request')
+    const paymentsCollection = database.collection('payments')
 
 
     //save in database user info with post
@@ -197,6 +198,44 @@ async function run() {
 
 res.send({url: session.url})
       
+    })
+
+    //payment success api full information in backend
+    app.post('/success-payment', async(req, res)=>{
+
+        const {session_id} = req.query;
+       const session = await stripe.checkout.sessions.retrieve(
+
+        session_id
+  
+        );
+
+        // console.log(session);
+
+        const transactionId = session.payment_intent;
+
+        const isPaymentExist = await paymentsCollection.findOne({transactionId})
+
+        if(isPaymentExist){
+          return res.status(400).send('Already Exist')
+        }
+
+        if(session.payment_status == 'paid'){
+          const paymentInfo = {
+            amount: session.amount_total/100,
+            currency:session.currency,
+            donarEmail: session.customer_email,
+            transactionId,
+            payment_status: session.payment_status,
+            paidAt: new Date()
+
+          }
+          const result = await paymentsCollection.insertOne(paymentInfo)
+          return res.send(result)
+        }
+
+        
+        
     })
 
 
