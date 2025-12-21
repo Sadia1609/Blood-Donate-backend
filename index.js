@@ -21,7 +21,7 @@ app.use(express.json())
 const admin = require("firebase-admin");
 const decoded = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf8')
 const serviceAccount = require("./blood-donate.json");
-const { info } = require('console');
+const { info, log } = require('console');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -163,6 +163,36 @@ async function run() {
 
 
       res.send({request: result, totalRequest})
+    })
+
+    //Search
+    app.get('/search-requests', async(req, res)=>{
+      const {bloodGroup, district, upazila} = req.query;
+
+      // console.log(req.query)
+
+      const query = {};
+
+      if(!query){
+        return;
+      }
+      if(bloodGroup){
+        const fixed = bloodGroup.replace(/ /g, "+").trim();
+        query.blood_group = fixed;
+      }
+      if(district){
+        query.recipient_district = district;
+      }
+      if(upazila){
+        query.recipient_upazila = upazila;
+      }
+
+      console.log(query);
+      
+
+     const result = await requestsCollections.find(query).toArray();
+     res.send(result)
+      
     })
 
 
