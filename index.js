@@ -8,6 +8,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config()
 const port = process.env.PORT || 3000
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
+const crypto = require('crypto');
 
 
 const app = express();
@@ -19,6 +21,7 @@ app.use(express.json())
 const admin = require("firebase-admin");
 const decoded = Buffer.from(process.env.FB_SERVICE_KEY, 'base64').toString('utf8')
 const serviceAccount = require("./blood-donate.json");
+const { info } = require('console');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -73,6 +76,7 @@ async function run() {
     const userCollections = database.collection('user')
     const requestsCollections = database.collection('request')
 
+
     //save in database user info with post
     app.post('/users', async(req,res)=>{
         const userInfo = req.body;
@@ -84,6 +88,13 @@ async function run() {
         res.send(result)
 
     })
+
+    app.get('/users', verifyFBToken, async (req ,res)=>{
+      const result = await userCollections.find().toArray();
+      res.status(200).send(result);
+    })
+
+    
 
 
     //create api
@@ -99,6 +110,21 @@ async function run() {
         res.send(result)
     })
 
+    //create api for active block update
+    app.patch('/update/user/status', verifyFBToken, async(req,res)=>{
+      const {email, status} = req.query;
+      const query = {email:email};
+
+      const updateStatus = {
+        $set:{
+          status: status
+        }
+      }
+      const result = await userCollections.updateOne(query, updateStatus)
+
+      res.send(result)
+    })
+
 
     //add request api(sent data frontend to backend) 
     app.post('/requests', verifyFBToken, async(req,res)=>{
@@ -111,20 +137,42 @@ async function run() {
      
     })
 
-    // //get manager products
-    // app.get('/manager/products/:email', async(req,res)=>{
-    //     const email = req.params.email;
-    //     const query = {managerEmail: email};
-
-    //     const result = await productCollections.find(query).toArray();
-    //     res.send(result)
-    // })
+    //my requests
+    app.get('/my-request', verifyFBToken, async (req, res)=>{
 
 
+      const email = req.decoded_email;
+
+      //pagination
+      
+      const size = Number(req.query.size)
+      const page = Number(req.query.page)
+
+
+      const query = {requester_email:email}
+
+      const result = await requestsCollections
+      .find(query)
+      .limit(size)
+      .skip(size*page)
+      .toArray();
+
+      //total page counter(total request)
+      const totalRequest = await requestsCollections.countDocuments(query);
+
+
+      res.send({request: result, totalRequest})
+    })
 
 
 
 
+    //payments
+    app.post('/create-payment-checkout', async(req, res)=>{
+      const information = req.body;
+      console.log(information);
+      
+    })
 
 
 
