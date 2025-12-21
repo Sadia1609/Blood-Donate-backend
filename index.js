@@ -170,7 +170,32 @@ async function run() {
     //payments
     app.post('/create-payment-checkout', async(req, res)=>{
       const information = req.body;
-      console.log(information);
+      const amount = parseInt(information.donateAmount) * 100;
+
+      const session = await stripe.checkout.sessions.create({
+  
+  line_items: [
+    {
+     price_data: {
+      currency:'usd',
+      unit_amount: amount,
+      product_data:{
+        name: 'please donate'
+      }
+     },
+      quantity: 1,
+    },
+  ],
+  mode: 'payment',
+  metadata: {
+    donarName: information?.donarName
+  },
+  customer_email: information.donarEmail,
+  success_url: `${process.env.SITE_DOMAIN}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `${process.env.SITE_DOMAIN}/payment-cancelled`,
+});
+
+res.send({url: session.url})
       
     })
 
