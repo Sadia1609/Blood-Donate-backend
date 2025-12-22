@@ -90,10 +90,18 @@ async function run() {
 
     })
 
-    app.get('/users', verifyFBToken, async (req ,res)=>{
-      const result = await userCollections.find().toArray();
-      res.status(200).send(result);
-    })
+   
+    app.get("/users", verifyFBToken, async (req, res) => {
+  const status = req.query.status;
+
+  let query = {};
+  if (status) {
+    query.status = status;
+  }
+
+  const result = await userCollections.find(query).toArray();
+  res.send(result);
+});
 
 
     // get single user profile
@@ -280,6 +288,97 @@ app.put("/requests/:id", verifyFBToken, async (req, res) => {
 });
 
 
+//all request
+app.get("/all-requests", verifyFBToken, async (req, res) => {
+  const page = parseInt(req.query.page) || 0;
+  const size = parseInt(req.query.size) || 10;
+  const status = req.query.status;
+
+  let query = {};
+  if (status) {
+    query.donation_status = status;
+  }
+
+  const result = await requestsCollections
+    .find(query)
+    .sort({ createdAt: -1 })
+    .skip(page * size)
+    .limit(size)
+    .toArray();
+
+  const totalRequest = await requestsCollections.countDocuments(query);
+
+  res.send({ request: result, totalRequest });
+});
+
+
+// PUBLIC: get only pending donation requests
+app.get("/public-requests", async (req, res) => {
+  const query = { donation_status: "pending" };
+
+  const result = await requestsCollections
+    .find(query)
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  res.send(result);
+});
+
+// CONFIRM DONATION
+app.patch("/donation-confirm/:id", verifyFBToken, async (req, res) => {
+  const { id } = req.params;
+  const { donorName, donorEmail } = req.body;
+
+  const query = { _id: new ObjectId(id) };
+
+  const updateDoc = {
+    $set: {
+      donation_status: "inprogress",
+      donor_name: donorName,
+      donor_email: donorEmail,
+    },
+  };
+
+  const result = await requestsCollections.updateOne(query, updateDoc);
+  res.send(result);
+});
+
+
+
+
+
+// admin stats
+app.get("/admin-stats", verifyFBToken, async (req, res) => {
+  const totalUsers = await userCollections.countDocuments();
+  const totalRequests = await requestsCollections.countDocuments();
+
+  const payments = await paymentsCollection.find().toArray();
+  const totalFunding = payments.reduce(
+    (sum, payment) => sum + payment.amount,
+    0
+  );
+
+  res.send({
+    totalUsers,
+    totalRequests,
+    totalFunding,
+  });
+});
+
+
+//change role
+app.patch("/update/user/role", verifyFBToken, async (req, res) => {
+  const { email, role } = req.query;
+
+  const result = await userCollections.updateOne(
+    { email },
+    { $set: { role } }
+  );
+
+  res.send(result);
+});
+
+
 
 
 
@@ -348,43 +447,67 @@ res.send({url: session.url})
       
     })
 
-    //payment success api full information in backend
-    app.post('/success-payment', async(req, res)=>{
+    
+    app.post("/success-payment", async (req, res) => {
+  const { session_id } = req.query;
 
-        const {session_id} = req.query;
-       const session = await stripe.checkout.sessions.retrieve(
+  const session = await stripe.checkout.sessions.retrieve(session_id);
+  const transactionId = session.payment_intent;
 
-        session_id
-  
-        );
+  const exists = await paymentsCollection.findOne({ transactionId });
+  if (exists) {
+    return res.send({ message: "Already saved" });
+  }
 
-        // console.log(session);
+  if (session.payment_status === "paid") {
+    const paymentInfo = {
+      donarName: session.metadata?.donarName || "Anonymous",
+      donarEmail: session.customer_email,
+      amount: session.amount_total / 100,
+      currency: session.currency,
+      transactionId,
+      paidAt: new Date(),
+    };
 
-        const transactionId = session.payment_intent;
+    await paymentsCollection.insertOne(paymentInfo);
+    return res.send({ success: true });
+  }
 
-        const isPaymentExist = await paymentsCollection.findOne({transactionId})
+  res.status(400).send({ message: "Payment not completed" });
+});
 
-        if(isPaymentExist){
-          return res.status(400).send('Already Exist')
-        }
 
-        if(session.payment_status == 'paid'){
-          const paymentInfo = {
-            amount: session.amount_total/100,
-            currency:session.currency,
-            donarEmail: session.customer_email,
-            transactionId,
-            payment_status: session.payment_status,
-            paidAt: new Date()
+//get all fundings
+app.get("/fundings", verifyFBToken, async (req, res) => {
+  const result = await paymentsCollection
+    .find()
+    .sort({ paidAt: -1 })
+    .toArray();
 
-          }
-          const result = await paymentsCollection.insertOne(paymentInfo)
-          return res.send(result)
-        }
+  res.send(result);
+});
 
-        
-        
-    })
+app.get("/admin-stats", verifyFBToken, async (req, res) => {
+  const totalUsers = await userCollections.countDocuments();
+  const totalRequests = await requestsCollections.countDocuments();
+
+  const fundingResult = await paymentsCollection.aggregate([
+    {
+      $group: {
+        _id: null,
+        total: { $sum: "$amount" },
+      },
+    },
+  ]).toArray();
+
+  const totalFunding = fundingResult[0]?.total || 0;
+
+  res.send({
+    totalUsers,
+    totalRequests,
+    totalFunding,
+  });
+});
 
 
 
