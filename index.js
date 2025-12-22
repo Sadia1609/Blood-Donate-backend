@@ -13,7 +13,11 @@ const crypto = require('crypto');
 
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ["https://blood-donate-4a1fa.web.app/", "http://localhost:5174"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json())
 //end initial config
 
@@ -40,7 +44,7 @@ const verifyFBToken = async(req,res,next) =>{
   try{
     const idToken = token.split(' ')[1]
     const decoded = await admin.auth().verifyIdToken(idToken)
-    console.log("decoded info", decoded)
+    // console.log("decoded info", decoded)
     req.decoded_email = decoded.email;
     next();
     
@@ -53,7 +57,7 @@ const verifyFBToken = async(req,res,next) =>{
 }
 
 
-const uri = "mongodb+srv://missionscic11:JCs7DKooZkysSMFN@cluster0.e62g5zs.mongodb.net/?appName=Cluster0";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.e62g5zs.mongodb.net/?appName=Cluster0`;
 
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -68,7 +72,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
 
     //create API
@@ -512,7 +516,7 @@ app.get("/admin-stats", verifyFBToken, async (req, res) => {
 
 
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
