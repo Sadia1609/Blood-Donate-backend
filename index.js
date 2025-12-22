@@ -82,7 +82,7 @@ async function run() {
     app.post('/users', async(req,res)=>{
         const userInfo = req.body;
         userInfo.createdAt = new Date();
-        userInfo.role = 'donar'
+        userInfo.role = userInfo?.role || 'donar'
         userInfo.status = 'active'
         const result = await userCollections.insertOne(userInfo);
 
@@ -95,7 +95,55 @@ async function run() {
       res.status(200).send(result);
     })
 
-    
+
+    // get single user profile
+      app.get('/users/:email', verifyFBToken, async (req, res) => {
+        const email = req.params.email;
+
+      
+        if (email !== req.decoded_email) {
+          return res.status(403).send({ message: 'Forbidden access' });
+        }
+
+        const query = { email };
+        const result = await userCollections.findOne(query);
+        res.send(result);
+      });
+
+
+      // update user profile
+          app.put('/users/:email', verifyFBToken, async (req, res) => {
+            const email = req.params.email;
+
+            // security check
+            if (email !== req.decoded_email) {
+              return res.status(403).send({ message: 'Forbidden access' });
+            }
+
+            const updatedInfo = req.body;
+
+            const updateDoc = {
+              $set: {
+                name: updatedInfo.name,
+                blood: updatedInfo.blood,
+                district: updatedInfo.district,
+                upazila: updatedInfo.upazila,
+                mainPhotoUrl: updatedInfo.mainPhotoUrl || null,
+                updatedAt: new Date(),
+              },
+            };
+
+            const result = await userCollections.updateOne(
+              { email },
+              updateDoc
+            );
+
+            res.send(result);
+          });
+
+
+
+              
 
 
     //create api
@@ -138,32 +186,102 @@ async function run() {
      
     })
 
-    //my requests
-    app.get('/my-request', verifyFBToken, async (req, res)=>{
+    // my requests
+app.get('/my-request', verifyFBToken, async (req, res) => {
+
+  const email = req.decoded_email;
+
+  const page = Number(req.query.page) || 0;
+  const size = Number(req.query.size) || 10;
+  const status = req.query.status;
+
+  let query = { requester_email: email };
+
+  if (status) {
+    query.donation_status = status;
+  }
+
+  const result = await requestsCollections
+    .find(query)
+    .sort({ createdAt: -1 })
+    .skip(page * size)
+    .limit(size)
+    .toArray();
+
+  const totalRequest = await requestsCollections.countDocuments(query);
+
+  res.send({
+    request: result,
+    totalRequest
+  });
+});
+
+//done cancel btn status update api
+const { ObjectId } = require("mongodb");
+
+app.patch("/request-status/:id", verifyFBToken, async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  // only allow valid status change
+  if (!["done", "canceled"].includes(status)) {
+    return res.status(400).send({ message: "Invalid status" });
+  }
+
+  const query = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: { donation_status: status },
+  };
+
+  const result = await requestsCollections.updateOne(query, updateDoc);
+  res.send(result);
+});
 
 
-      const email = req.decoded_email;
+//delete api
+app.delete("/requests/:id", verifyFBToken, async (req, res) => {
+  const { id } = req.params;
 
-      //pagination
-      
-      const size = Number(req.query.size)
-      const page = Number(req.query.page)
+  const result = await requestsCollections.deleteOne({
+    _id: new ObjectId(id),
+  });
 
-
-      const query = {requester_email:email}
-
-      const result = await requestsCollections
-      .find(query)
-      .limit(size)
-      .skip(size*page)
-      .toArray();
-
-      //total page counter(total request)
-      const totalRequest = await requestsCollections.countDocuments(query);
+  res.send(result);
+});
 
 
-      res.send({request: result, totalRequest})
-    })
+//view details
+app.get("/requests/:id", verifyFBToken, async (req, res) => {
+  const { id } = req.params;
+
+  const result = await requestsCollections.findOne({
+    _id: new ObjectId(id),
+  });
+
+  res.send(result);
+});
+
+
+
+//edit request
+app.put("/requests/:id", verifyFBToken, async (req, res) => {
+  const { id } = req.params;
+
+  const updateDoc = {
+    $set: req.body,
+  };
+
+  const result = await requestsCollections.updateOne(
+    { _id: new ObjectId(id) },
+    updateDoc
+  );
+
+  res.send(result);
+});
+
+
+
+
 
     //Search
     app.get('/search-requests', async(req, res)=>{
