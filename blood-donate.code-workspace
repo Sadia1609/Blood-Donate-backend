@@ -1,0 +1,25 @@
+{
+    "folders": [
+        {
+            "name": "Backend",
+            "path": "."
+        },
+        {
+            "name": "Frontend",
+            "path": "./frontend"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "**/node_modules": true,
+            "**/.git": true
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-vscode.vscode-typescript-next",
+            "bradlc.vscode-tailwindcss",
+            "esbenp.prettier-vscode"
+        ]
+    }
+}
