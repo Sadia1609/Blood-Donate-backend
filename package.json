@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node start-dev.js",
+    "dev": "nodemon start-dev.js",
     "backend": "node index-simple.js",
     "frontend": "cd frontend && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,10 +16,16 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "express": "^5.2.1",
+    "express": "^4.18.2",
     "firebase-admin": "^13.6.0",
-    "mongodb": "^7.0.0",
+    "mongodb": "^6.5.0",
     "serverless-http": "^4.0.0",
     "stripe": "^20.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
