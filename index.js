@@ -52,8 +52,21 @@ const client = new MongoClient(uri, {
   }
 });
 
-let db;
-let isConnected = false;
+let cachedDb = null;
+
+async function getDB() {
+  if (cachedDb) return cachedDb;
+
+  await client.connect();
+  const db = client.db("bloodDonateDB");
+  cachedDb = db;
+  console.log("✅ MongoDB connected (cached)");
+  return db;
+}
+
+
+// let db;
+// let isConnected = false;
 
 // Connect to MongoDB
 async function connectDB() {
@@ -77,7 +90,7 @@ async function connectDB() {
 }
 
 // Initialize DB connection
-connectDB();
+// connectDB();
 
 // Fallback data for when MongoDB is not connected
 const fallbackUsers = [
@@ -152,56 +165,89 @@ app.get("/api/test", (req, res) => {
 });
 
 // Get user role by email
+// app.get("/users/role/:email", async (req, res) => {
+//   try {
+//     // const { email } = req.params;
+//     const email = decodeURIComponent(req.params.email);
+//     console.log("Fetching role for:", email);
+    
+//     if (isConnected && db) {
+//       // Use MongoDB
+//       const usersCollection = db.collection("users");
+//       const user = await usersCollection.findOne({ email: email });
+      
+//       if (user) {
+//         res.json({
+//           email: user.email,
+//           role: user.role || "donar",
+//           status: user.status || "active",
+//           name: user.name || user.displayName || "User"
+//         });
+//       } else {
+//         // Return default role for new users
+//         res.json({
+//           email: email,
+//           role: "donar",
+//           status: "active",
+//           name: "New User"
+//         });
+//       }
+//     } else {
+//       // Use fallback data
+//       const user = fallbackUsers.find(u => u.email === email);
+      
+//       if (user) {
+//         res.json(user);
+//       } else {
+//         res.json({
+//           email: email,
+//           role: "donar",
+//           status: "active",
+//           name: "New User"
+//         });
+//       }
+//     }
+//   } catch (error) {
+//     console.error("Error fetching user role:", error);
+//     res.status(500).json({ 
+//       error: "Failed to fetch user role",
+//       message: error.message 
+//     });
+//   }
+// });
 app.get("/users/role/:email", async (req, res) => {
   try {
-    // const { email } = req.params;
     const email = decodeURIComponent(req.params.email);
     console.log("Fetching role for:", email);
-    
-    if (isConnected && db) {
-      // Use MongoDB
-      const usersCollection = db.collection("users");
-      const user = await usersCollection.findOne({ email: email });
-      
-      if (user) {
-        res.json({
-          email: user.email,
-          role: user.role || "donar",
-          status: user.status || "active",
-          name: user.name || user.displayName || "User"
-        });
-      } else {
-        // Return default role for new users
-        res.json({
-          email: email,
-          role: "donar",
-          status: "active",
-          name: "New User"
-        });
-      }
-    } else {
-      // Use fallback data
-      const user = fallbackUsers.find(u => u.email === email);
-      
-      if (user) {
-        res.json(user);
-      } else {
-        res.json({
-          email: email,
-          role: "donar",
-          status: "active",
-          name: "New User"
-        });
-      }
+
+    const db = await getDB(); // ✅ always get cached db
+    const usersCollection = db.collection("users");
+    const user = await usersCollection.findOne({ email });
+
+    if (user) {
+      return res.json({
+        email: user.email,
+        role: user.role || "donar",
+        status: user.status || "active",
+        name: user.name || user.displayName || "User",
+      });
     }
+
+    return res.json({
+      email,
+      role: "donar",
+      status: "active",
+      name: "New User",
+    });
   } catch (error) {
-    console.error("Error fetching user role:", error);
-    res.status(500).json({ 
+    console.error("❌ Error fetching user role:", error);
+    res.status(500).json({
       error: "Failed to fetch user role",
-      message: error.message 
+      message: error.message,
     });
   }
 });
+
 
 // Create/Update user
 app.post("/users", async (req, res) => {
