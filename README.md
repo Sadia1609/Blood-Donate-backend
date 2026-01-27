@@ -48,8 +48,8 @@ Blood-Donate-backend/
 
 ## Server URLs
 
-- **Backend:** http://localhost:3000
-- **Frontend:** http://localhost:5173 (or next available port)
+- **Backend:** https://blood-donate-backend-six.vercel.app/
+- **Frontend:** https://blood-donate-4a1fa.web.app/
 
 ## API Endpoints
 
