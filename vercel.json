@@ -2,20 +2,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "./index.js",
+      "src": "index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/",
-      "headers": {
-        "Access-Control-Allow-Origin": "https://blood-donate-4a1fa.web.app",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
-      }
+      "dest": "/index.js"
     }
-  ]
+  ],
+  "env": {
+    "MONGODB_URI": "mongodb+srv://missionscic11:Av0baylRPcAW9f2N@cluster0.e62g5zs.mongodb.net/bloodDonateDB?retryWrites=true&w=majority&appName=Cluster0",
+    "DB_USER": "missionscic11",
+    "DB_PASS": "Av0baylRPcAW9f2N"
+  }
 }
