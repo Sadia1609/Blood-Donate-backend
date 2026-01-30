@@ -2,7 +2,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://blood-donate-4a1fa.web.app)
 [![Backend API](https://img.shields.io/badge/Backend-API-blue)](https://blood-donate-backend-six.vercel.app)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 
 A comprehensive full-stack blood donation management platform that connects donors with patients in need, featuring real-time blood request management, emergency response capabilities, and administrative oversight.
 
@@ -51,9 +51,6 @@ A comprehensive full-stack blood donation management platform that connects dono
 - **Frontend:** [https://blood-donate-4a1fa.web.app](https://blood-donate-4a1fa.web.app)
 - **Backend API:** [https://blood-donate-backend-six.vercel.app](https://blood-donate-backend-six.vercel.app)
 
-### Demo Credentials
-- **Admin:** admin@gmail.com (any password)
-- **Donor:** Any other email (any password)
 
 ## 🛠️ Tech Stack
 
@@ -108,7 +105,7 @@ Blood-Donate-backend/
 
 ### Prerequisites
 - **Node.js** (v16 or higher)
-- **npm** or **yarn**
+- **npm** 
 - **MongoDB Atlas account**
 - **Firebase project**
 
@@ -144,10 +141,6 @@ cd blood-donation-system
 - **Frontend only:** `npm run frontend`
 - **Production backend:** `npm start`
 
-## Server URLs
-
-- **Backend:** https://blood-donate-backend-six.vercel.app/
-- **Frontend:** https://blood-donate-4a1fa.web.app/
 
 ## API Endpoints
 
@@ -162,20 +155,6 @@ cd blood-donation-system
 - **Frontend:** Deployed on Firebase Hosting
 - **Backend:** Deployed on Vercel
 
-## Environment Variables
-
-Create a `.env` file in the root directory with:
->>>>>>> 5e0b98495edcd1e9cfc03501806f20f619f3fb57
-```
-
-### 2. Backend Setup
-```bash
-cd Backend
-npm install
-
-# Create .env file
-cp .env.example .env
-# Add your MongoDB connection string and other environment variables
 ```
 
 ### 3. Frontend Setup
@@ -308,24 +287,8 @@ cd Backend
 vercel --prod
 ```
 
-## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
-- Email: your.email@example.com
 
 ## 🙏 Acknowledgments
 
@@ -335,22 +298,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Tailwind CSS for styling framework
 - React community for excellent documentation
 
-## 📊 Project Statistics
-
-- **Total Lines of Code:** 15,000+
-- **Components:** 25+
-- **API Endpoints:** 20+
-- **Pages:** 15+
-- **Development Time:** 2 months
 
 ---
 
-⭐ **If you found this project helpful, please give it a star!** ⭐
-=======
-### Backend
-- Express.js
-- CORS
-- MongoDB (production)
-- Firebase Admin (authentication)
-- Stripe (payments)
->>>>>>> 5e0b98495edcd1e9cfc03501806f20f619f3fb57
