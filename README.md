@@ -112,10 +112,60 @@ Blood-Donate-backend/
 - **MongoDB Atlas account**
 - **Firebase project**
 
+<<<<<<< HEAD
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/yourusername/blood-donation-system.git
 cd blood-donation-system
+=======
+### Quick Start
+
+1. **Install backend dependencies:**
+   ```bash
+   cd Blood-Donate-backend
+   npm install
+   ```
+
+2. **Install frontend dependencies:**
+   ```bash
+   cd frontend
+   npm install
+   cd ..
+   ```
+
+3. **Start both servers:**
+   ```bash
+   npm run dev
+   ```
+
+### Individual Server Commands
+
+- **Backend only:** `npm run backend`
+- **Frontend only:** `npm run frontend`
+- **Production backend:** `npm start`
+
+## Server URLs
+
+- **Backend:** https://blood-donate-backend-six.vercel.app/
+- **Frontend:** https://blood-donate-4a1fa.web.app/
+
+## API Endpoints
+
+- `GET /` - Health check
+- `GET /api/test` - API test
+- `GET /public-requests` - Blood donation requests
+- `GET /users/role/:email` - User role checking
+- `POST /users` - User registration
+
+## Deployment
+
+- **Frontend:** Deployed on Firebase Hosting
+- **Backend:** Deployed on Vercel
+
+## Environment Variables
+
+Create a `.env` file in the root directory with:
+>>>>>>> 5e0b98495edcd1e9cfc03501806f20f619f3fb57
 ```
 
 ### 2. Backend Setup
@@ -153,6 +203,7 @@ FIREBASE_ADMIN_SDK=your_firebase_admin_sdk_key
 # Backend (from Backend directory)
 npm run dev
 
+<<<<<<< HEAD
 # Frontend (from Frontend directory)
 npm run dev
 ```
@@ -295,3 +346,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 ⭐ **If you found this project helpful, please give it a star!** ⭐
+=======
+### Backend
+- Express.js
+- CORS
+- MongoDB (production)
+- Firebase Admin (authentication)
+- Stripe (payments)
+>>>>>>> 5e0b98495edcd1e9cfc03501806f20f619f3fb57
