@@ -11,7 +11,7 @@ A comprehensive full-stack blood donation management platform that connects dono
 ### 🔐 Authentication & Authorization
 - **Firebase Authentication** with email/password
 - **Role-based access control** (Admin/Donor)
-- **Secure JWT token management**
+- **Firebase Authentication** with ID tokens
 - **Protected routes** and API endpoints
 
 ### 👥 User Management
@@ -257,7 +257,7 @@ const filteredRequests = requests.filter(request =>
 
 ## 🔒 Security Features
 
-- **JWT Authentication** with Firebase
+- **Token-based authentication** using Firebase SDK
 - **Role-based authorization**
 - **Input validation and sanitization**
 - **CORS configuration**
